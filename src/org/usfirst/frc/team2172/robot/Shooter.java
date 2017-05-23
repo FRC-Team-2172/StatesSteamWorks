@@ -5,7 +5,6 @@ import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.PIDSourceType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Shooter {
@@ -38,7 +37,8 @@ public class Shooter {
 	}
 	
 	public void enable(){
-		this.shooter.set(312);
+		//this.shooter.set(312);
+		this.shooter.set(2000);
 	}
 	
 	public void disable(){
@@ -64,39 +64,14 @@ public class Shooter {
 	public void shoot(double tAngle){
 		SmartDashboard.putNumber("Positioner Target Angle", tAngle);
 		SmartDashboard.putNumber("Positioner Current Angle", cAngle);
-		this.positioner.setPID(-7.0, -4.0, 1.85);
-		this.positioner.setF(10.1);
-		boolean calibrated = false;
-		/*while (!calibrated) {
-			if(this.cAngle > tAngle){
-				this.positioner.set(-0.2);
-				this.cAngle = (Math.PI/2) - (0.454 - ((2*Math.PI)*((0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI)))); //There is a small chance I fucked up Q
-			} else if(this.cAngle < tAngle){
-				this.positioner.set(0.2);
-				this.cAngle = (Math.PI/2) - (0.454 - ((2*Math.PI)*((0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI)))); //There is a small chance I fucked up Q
-			} else {
-				this.positioner.set(0);
-				calibrated = true;
-			}
-			SmartDashboard.putNumber("Positioner Target Angle", tAngle);
-			SmartDashboard.putNumber("Positioner Current Angle", cAngle);
-		}*/
-		while (!calibrated) {
-			this.positioner.setSetpoint(tAngle);
-			if (this.positioner.pidGet() == this.positioner.getSetpoint()) {
-				this.positioner.set(0);
-				calibrated = true;
-			}
-			else if (this.positioner.pidGet() > this.positioner.getSetpoint()) {
-				this.positioner.set(-0.2);
-				this.positioner.pidWrite((Math.PI/2) - (0.454 - ((2*Math.PI)*((0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI)))));
-			}
-			else if (this.positioner.pidGet() < this.positioner.getSetpoint()) {
-				this.positioner.set(0.2);
-				this.positioner.pidWrite((Math.PI/2) - (0.454 - ((2*Math.PI)*((0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI)))));
-			}
-			SmartDashboard.putNumber("Positioner Target Angle", this.positioner.getSetpoint());
-			SmartDashboard.putNumber("Positioner Current Angle", this.positioner.pidGet());
+		if(this.cAngle > tAngle){
+			this.positioner.set(0.5);
+			this.cAngle = (Math.PI/2) - (0.454 - ((2*Math.PI)*((0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI)))); //There is a small chance I fucked up Q
+		} else if(this.cAngle < tAngle){
+			this.positioner.set(-0.5);
+			this.cAngle = (Math.PI/2) - (0.454 - ((2*Math.PI)*((0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI)))); //There is a small chance I fucked up Q
+		} else {
+			this.positioner.set(0);
 		}
 	}
 	
