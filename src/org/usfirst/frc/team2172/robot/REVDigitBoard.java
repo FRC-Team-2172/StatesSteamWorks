@@ -48,7 +48,7 @@ public class REVDigitBoard {
 		i2c.writeBulk(blink);
 		Timer.delay(.01);
 		
-		charreg = new byte[37][2]; //charreg is short for character registry
+		charreg = new byte[38][2]; //charreg is short for character registry
 		charmap = new HashMap<Character, Integer>(); 
 		
 		charreg[0][0] = (byte)0b00111111; charreg[9][1] = (byte)0b00000000; //0*
@@ -126,6 +126,8 @@ public class REVDigitBoard {
 		charmap.put('Z',35);
 		charreg[36][0] = (byte)0b00000000; charreg[36][1] = (byte)0b00000000; //space
 		charmap.put(' ',36);
+		charreg[37][0] = (byte)0b11000000; charreg[36][1] = (byte)0b00000000; //-
+		charmap.put('-',37);
 	}
 	
 	public void display(String str) { // only displays first 4 chars
