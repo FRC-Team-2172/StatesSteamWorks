@@ -51,26 +51,58 @@ public class Robot extends IterativeRobot {
 		digit.clear();
 		Thread autoChoose = new Thread(() -> {
 			int tAutoMode = autoMode;
-			double aMax = 214;
-			double aMin = 198;
-			while(!Thread.interrupted()){
-				digit.display("" + tAutoMode + "A");
-				int pot = digit.getPot();
-				tAutoMode = (int)Math.round(((pot - aMin)/(aMax - aMin) * 2));
-				SmartDashboard.putNumber("Auto Mode", autoMode);
+			digit.display("--" + tAutoMode + "A");
+			while (!Thread.interrupted()) {
 				if (!digit.getButtonA()) {
-					autoMode = tAutoMode;
-					for (int i = 0; i < 5; i++) {
-						digit.clear();
-						Timer.delay(0.3);
-						digit.display("" + tAutoMode + "A");
-						Timer.delay(0.3);
+					Timer.delay(0.05);
+					if (!digit.getButtonB()) {
+						autoMode = tAutoMode;
+						for (int i = 0; i < 5; i++) {
+							digit.clear();
+							Timer.delay(0.3);
+							digit.display("--" + tAutoMode + "A");
+							Timer.delay(0.3);
+						}
+					}
+					else {
+						while (!digit.getButtonA()) {
+							Timer.delay(0.05);
+						}
+						if (tAutoMode == 1) {
+							tAutoMode = 3;
+						}
+						else {
+							tAutoMode--;
+						}
+						String selected = tAutoMode == autoMode ? "--" : "";
+						digit.display(selected + tAutoMode + "A");
+						Timer.delay(0.1);
 					}
 				}
-				if(!digit.getButtonB()){
-					while(!digit.getButtonB()){
-						tAutoMode++;
+				else if (!digit.getButtonB()) {
+					Timer.delay(0.05);
+					if (!digit.getButtonA()) {
 						autoMode = tAutoMode;
+						for (int i = 0; i < 5; i++) {
+							digit.clear();
+							Timer.delay(0.3);
+							digit.display("--" + tAutoMode + "A");
+							Timer.delay(0.3);
+						}
+					}
+					else {
+						while (!digit.getButtonB()) {
+							Timer.delay(0.05);
+						}
+						if (tAutoMode == 3) {
+							tAutoMode = 1;
+						}
+						else {
+							tAutoMode++;
+						}
+						String selected = tAutoMode == autoMode ? "--" : "";
+						digit.display(selected + tAutoMode + "A");
+						Timer.delay(0.1);
 					}
 				}
 			}
