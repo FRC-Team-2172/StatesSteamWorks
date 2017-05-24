@@ -5,6 +5,7 @@ import com.ctre.CANTalon.FeedbackDevice;
 import com.ctre.CANTalon.TalonControlMode;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.PIDSourceType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Shooter {
@@ -34,11 +35,11 @@ public class Shooter {
 		this.positioner.configNominalOutputVoltage(+0.0f, -0.0f);
 		this.positioner.configPeakOutputVoltage(+12.0f, -12.0f);
 		this.positioner.setProfile(0);
+		this.positioner.changeControlMode(TalonControlMode.Position);
 	}
 	
-	public void enable(){
-		//this.shooter.set(312);
-		this.shooter.set(2000);
+	public void shoot(){
+		this.shooter.set(312);
 	}
 	
 	public void disable(){
@@ -61,21 +62,61 @@ public class Shooter {
 		}
 	}
 	
-	public void shoot(double tAngle){
+	public void position(double tAngle){
 		SmartDashboard.putNumber("Positioner Target Angle", tAngle);
 		SmartDashboard.putNumber("Positioner Current Angle", cAngle);
-		if(this.cAngle > tAngle){
-			this.positioner.set(0.5);
-			this.cAngle = (Math.PI/2) - (0.454 - ((2*Math.PI)*((0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI)))); //There is a small chance I fucked up Q
-		} else if(this.cAngle < tAngle){
-			this.positioner.set(-0.5);
-			this.cAngle = (Math.PI/2) - (0.454 - ((2*Math.PI)*((0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI)))); //There is a small chance I fucked up Q
-		} else {
-			this.positioner.set(0);
-		}
+		//this.positioner.setPID(-7.0, -4.0, 1.85);
+		//this.positioner.setF(10.1);
+		//boolean calibrated = false;
+		/*while (!calibrated) {
+			if(this.cAngle > tAngle){
+				this.positioner.set(-0.2);
+				this.cAngle = (Math.PI/2) - (0.454 - ((2*Math.PI)*((0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI)))); //There is a small chance I fucked up Q
+			} else if(this.cAngle < tAngle){
+				this.positioner.set(0.2);
+				this.cAngle = (Math.PI/2) - (0.454 - ((2*Math.PI)*((0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI)))); //There is a small chance I fucked up Q
+			} else {
+				this.positioner.set(0);
+				calibrated = true;
+			}
+			SmartDashboard.putNumber("Positioner Target Angle", tAngle);
+			SmartDashboard.putNumber("Positioner Current Angle", cAngle);
+		}*/
+		//while (!calibrated) {
+			double p = 0.1;
+			double i = 1.0;
+			double d = 1.0;
+			this.positioner.setProfile(0);
+			this.positioner.setPID(p, i, d);
+			this.positioner.setAllowableClosedLoopErr(1);
+			this.positioner.setPosition((Math.PI/2) - (0.454 - ((2*Math.PI)*((0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI)))));
+			this.positioner.set(tAngle);
+			
+			/*if (this.positioner.pidGet() == this.positioner.getSetpoint()) {
+				this.positioner.set(0);
+				calibrated = true;
+			}
+			else if (this.positioner.pidGet() > this.positioner.getSetpoint()) {
+				this.positioner.set(-0.2);
+				this.positioner.pidWrite((Math.PI/2) - (0.454 - ((2*Math.PI)*((0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI)))));
+			}
+			else if (this.positioner.pidGet() < this.positioner.getSetpoint()) {
+				this.positioner.set(0.2);
+				this.positioner.pidWrite((Math.PI/2) - (0.454 - ((2*Math.PI)*((0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI)))));
+			}*/
+			while (this.positioner.pidGet() != this.positioner.getSetpoint()) {
+				SmartDashboard.putNumber("Positioner PID Error", this.positioner.getError());
+				SmartDashboard.putNumber("Positioner Target Angle", this.positioner.getSetpoint());
+				SmartDashboard.putNumber("Positioner Current Angle", this.positioner.pidGet());
+				p = SmartDashboard.getNumber("Positioner P", p);
+				i = SmartDashboard.getNumber("Positioner I", i);
+				d = SmartDashboard.getNumber("Positioner D", d);
+				this.positioner.setPID(p, i, d);
+			}
+		//}
 	}
 	
-	public void callibrate(){
+	public void callibrate() {
 		/*
 		boolean callibrated = false;
 		this.positioner.set(0.5);
@@ -100,7 +141,7 @@ public class Shooter {
 	}
 	
 	public void test(){
-		this.enable();
+		this.shoot();
 		this.shooter.set(10000);
 		DriverStation.reportWarning("" + this.shooter.getSpeed(), false);
 	}
