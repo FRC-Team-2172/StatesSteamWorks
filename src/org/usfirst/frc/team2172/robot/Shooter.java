@@ -51,15 +51,7 @@ public class Shooter {
 		double d = 0.0254*79.5/Math.tan(camera.getY()*0.325 * (Math.PI/180));
 		double tAngle = Math.atan((Math.pow(p*9.44, 2)-Math.sqrt(Math.pow(p*9.44, 4)-Math.pow(9.8*d, 2)-(2*9.8*(2.743-0.45)*Math.pow(p*9.44, 2))))/(9.8*d));
 		
-		if(this.cAngle > tAngle){
-			this.positioner.set(0.5);
-			this.cAngle = (Math.PI/2) - (0.454 - ((2*Math.PI)*(0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI))); //There is a small chance I fucked up Q
-		} else if(this.cAngle < tAngle){
-			this.positioner.set(-0.5);
-			this.cAngle = (Math.PI/2) - (0.454 - ((2*Math.PI)*(0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI))); //There is a small chance I fucked up Q
-		} else {
-			this.positioner.set(0);
-		}
+		position(tAngle);
 	}
 	
 	public void position(double tAngle){
@@ -104,15 +96,6 @@ public class Shooter {
 				this.positioner.set(0.2);
 				this.positioner.pidWrite((Math.PI/2) - (0.454 - ((2*Math.PI)*((0.25*this.positioner.getEncPosition()/90)/16.0/(9.4 * Math.PI)))));
 			}*/
-			while (this.positioner.pidGet() != this.positioner.getSetpoint()) {
-				SmartDashboard.putNumber("Positioner PID Error", this.positioner.getError());
-				SmartDashboard.putNumber("Positioner Target Angle", this.positioner.getSetpoint());
-				SmartDashboard.putNumber("Positioner Current Angle", this.positioner.pidGet());
-				p = SmartDashboard.getNumber("Positioner P", p);
-				i = SmartDashboard.getNumber("Positioner I", i);
-				d = SmartDashboard.getNumber("Positioner D", d);
-				this.positioner.setPID(p, i, d);
-			}
 		//}
 	}
 	
